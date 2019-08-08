@@ -1,0 +1,93 @@
+<script type="text/x-red" data-help-name="fronius-control">
+  <p>
+        This node enables communication to a fronius. At the moments 2 topics are supported:
+  </p>
+</script>
+<script type="text/x-red" data-template-name="fronius-control">
+  <div class="form-row">
+    <label for="node-input-inverter">
+      <i class="fa fa-globe"></i>
+      Inverter
+    </label>
+    <input type="text" id="node-input-inverter">
+  </div>
+  <div class="form-row">
+    <label for="node-input-deviceid">
+        <i class="icon-home"></i>
+        DeviceID
+    </label>
+    <input type="text" id="node-input-deviceid">
+  </div>
+  <input type="hidden" id="node-input-name" placeholder="Name">
+  <div class="form-row">
+    <span id="return-msg"></span>
+  </div>
+
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('fronius-control', {
+    category: 'fronius',
+    paletteLabel: 'control in',
+    color: '#aaaaaa',
+    defaults: {
+      name: {
+        value: ''
+      },
+      deviceid: {
+        value: '',
+        required: true
+      },
+      inverter: {
+        type: 'fronius-inverter',
+        required: true
+      }
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "fronius.svg",
+    label: function () {
+      return this.name || "fronius control in";
+    }
+  });
+</script>
+
+<script type="text/x-red" data-help-name="fronius-inverter">
+  <p>
+
+  </p>
+</script>
+<script type="text/x-red" data-template-name="fronius-inverter">
+  <div class="form-row node-input-inverter">
+        <label for="node-config-input-host">
+            <i class="fa fa-globe"></i> Inverter
+        </label>
+        <input class="input-append-left" type="text" id="node-config-input-host" placeholder="hostname/ip" style="width: 40%;" >
+        <label for="node-config-input-port" style="margin-left: 10px; width: 35px;">
+            Port
+        </label>
+        <input type="text" id="node-config-input-port" style="width:45px" placeholder="80">
+    </div>
+
+
+</script>
+<script type="text/javascript">
+  RED.nodes.registerType('fronius-inverter', {
+    category: 'config',
+    defaults: {
+      host: {
+        value: "",
+        required: true
+      },
+      port: {
+        value: 80,
+        required: true,
+        validate: RED.validators.number()
+      }
+    },
+    icon: "fronius.svg",
+    label: function () {
+      return this.host + ':' + this.port;
+    }
+  });
+</script>
