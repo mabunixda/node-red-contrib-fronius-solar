@@ -1,0 +1,24 @@
+language: node_js
+node_js:
+  - "10"
+  - "9"
+  - "8"
+  - "7"
+  - "6"
+
+cache:
+  directories:
+    - "node_modules"
+
+before_install:
+  - npm install -g npm-check
+  - npm install -g mocha
+
+install:
+  - npm install
+
+script:
+  - grep console fronius/* || echo "no console logging found"
+  - npm-check --skip-unused
+  - npm test
+
