@@ -18,6 +18,17 @@
     </label>
     <input type="text" id="node-input-deviceid">
   </div>
+
+  <div class="form-row">
+    <label for="node-input-querytype">
+      <i class="fa fa-globe"></i>
+      Query
+    </label>
+      <select id="node-input-querytype">
+        <option value="inverter">Inverter Data</option>
+        <option value="powerflow">Powerflow Data</option>
+      </select>
+  </div>
   <input type="hidden" id="node-input-name" placeholder="Name">
   <div class="form-row">
     <span id="return-msg"></span>
@@ -41,6 +52,9 @@
       inverter: {
         type: 'fronius-inverter',
         required: true
+      },
+      querytype: {
+        value: 'inverter'
       }
     },
     inputs: 1,
@@ -67,9 +81,17 @@
             Port
         </label>
         <input type="text" id="node-config-input-port" style="width:45px" placeholder="80">
-    </div>
-
-
+  </div>
+  <div class="form-row">
+    <label for="node-input-apiversion">
+        <i class="fa fa-globe"></i>
+        API Version
+    </label>
+    <select id="node-input-apiversion">
+      <option>0</option>
+      <option>1</option>
+    </select>
+  </div>       
 </script>
 <script type="text/javascript">
   RED.nodes.registerType('fronius-inverter', {
@@ -83,11 +105,14 @@
         value: 80,
         required: true,
         validate: RED.validators.number()
+      },
+      apiversion: {
+        value: 1
       }
     },
     icon: "fronius.svg",
     label: function () {
-      return this.host + ':' + this.port;
+      return this.host + ':' + this.port + "#API" + this.apiversion;
     }
   });
 </script>
