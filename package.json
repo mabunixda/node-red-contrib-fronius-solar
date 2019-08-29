@@ -18,5 +18,11 @@
   "dependencies": {
     "node-fronius-solar": "^0.0.10"
   },
+  "devDependencies": {
+    "babel-eslint": "^10.0.3",
+    "eslint": "^6.2.2",
+    "eslint-config-google": "^0.13.0",
+    "eslint-plugin-standard": "^4.0.1"
+  },
   "repository": "mabunixda/node-red-contrib-fronius-solar"
 }
