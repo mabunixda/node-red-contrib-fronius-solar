@@ -17,6 +17,12 @@ jobs:
       - name: Build
         if: steps.cache-modules.outputs.cache-hit != 'true'
         run: npm install
+      - name: install deps
+        run: npm install -g npm-check mocha eslint
+      - name: npm-check
+        run: npm-check --skip-unused
+      - name: lint
+        run: ./scripts/lint.sh
       - name: Test
         run: npm test
       - name: Publish
