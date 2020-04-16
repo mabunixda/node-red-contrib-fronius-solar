@@ -18,7 +18,7 @@ jobs:
         if: steps.cache-modules.outputs.cache-hit != 'true'
         run: npm install
       - name: install deps
-        run: npm install -g npm-check mocha eslint
+        run: npm install npm-check mocha eslint
       - name: npm-check
         run: npm-check --skip-unused
       - name: lint
