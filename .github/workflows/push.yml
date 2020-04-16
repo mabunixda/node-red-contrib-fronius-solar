@@ -20,7 +20,7 @@ jobs:
       - name: install deps
         run: npm install npm-check mocha eslint
       - name: npm-check
-        run: npm-check --skip-unused
+        run: ./node_modules/npm-check/bin/cli.js --skip-unused
       - name: lint
         run: ./scripts/lint.sh
       - name: Test
