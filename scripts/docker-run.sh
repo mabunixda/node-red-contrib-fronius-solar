@@ -5,9 +5,9 @@ npm link /src
 
 cd /src || exit 1
 npm install
-npm install -g npm-check
-npm install -g mocha
-npm install -g eslint
+npm install  npm-check
+npm install  mocha
+npm install  eslint
 
 cd /usr/src/node-red || exit 2
 

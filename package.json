@@ -16,7 +16,9 @@
     }
   },
   "dependencies": {
-    "node-fronius-solar": "^0.0.10"
+    "mocha": "^7.1.1",
+    "node-fronius-solar": "^0.0.10",
+    "npm-check": "^5.9.2"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
