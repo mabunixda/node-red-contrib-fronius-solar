@@ -27,6 +27,8 @@
       <select id="node-input-querytype">
         <option value="inverter">Inverter Data</option>
         <option value="powerflow">Powerflow Data</option>
+        <option value="storage">Storage Data</option>
+        <option value="powermeter">Powermeter Data</option>
       </select>
   </div>
   <input type="hidden" id="node-input-name" placeholder="Name">
@@ -91,7 +93,7 @@
       <option>0</option>
       <option>1</option>
     </select>
-  </div>       
+  </div>
 </script>
 <script type="text/javascript">
   RED.nodes.registerType('fronius-inverter', {
