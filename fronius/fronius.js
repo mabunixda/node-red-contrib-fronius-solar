@@ -95,6 +95,28 @@ module.exports = function(RED) {
       }).catch(function(e) {
         node.setNodeStatus('red', e);
       });
+    } else if (node.querytype === 'storage') {
+      fronius.GetStorageRealtimeData(node.options).then(function(json) { // eslint-disable-line
+        if (!node.isValidHead(json)) {
+          node.setNodeStatus('orange', json.Head.Status.UserMessage);
+          return;
+        }
+        msg.payload = json.Body.Data;
+        node.send(msg);
+      }).catch(function(e) {
+        node.setNodeStatus('red', e);
+      });
+    } else if (node.querytype === 'powermeter') {
+      fronius.GetPowerMeterRealtimeData(node.options).then(function(json) { // eslint-disable-line
+        if (!node.isValidHead(json)) {
+          node.setNodeStatus('orange', json.Head.Status.UserMessage);
+          return;
+        }
+        msg.payload = json.Body.Data;
+        node.send(msg);
+      }).catch(function(e) {
+        node.setNodeStatus('red', e);
+      });
     } else {
       node.setNodeStatus('orange', 'could not process query of ' +
         node.querytype);
