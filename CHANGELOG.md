@@ -1,3 +1,17 @@
+<a name="v1.0.3"></a>
+# [v1.0.3](https://github.com/mabunixda/node-red-contrib-fronius-solar/releases/tag/v1.0.3) - 16 Dec 2021
+
+## 1.0.3 (2021-12-16)
+
+#### Bug Fixes
+
+* closes #23 and removes console output (#24) (d3385e9d)
+
+
+
+[Changes][v1.0.3]
+
+
 <a name="v1.0.2"></a>
 # [v1.0.2](https://github.com/mabunixda/node-red-contrib-fronius-solar/releases/tag/v1.0.2) - 06 Dec 2021
 
@@ -45,6 +59,7 @@
 [Changes][v1.0.0]
 
 
+[v1.0.3]: https://github.com/mabunixda/node-red-contrib-fronius-solar/compare/v1.0.2...v1.0.3
 [v1.0.2]: https://github.com/mabunixda/node-red-contrib-fronius-solar/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/mabunixda/node-red-contrib-fronius-solar/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/mabunixda/node-red-contrib-fronius-solar/tree/v1.0.0
