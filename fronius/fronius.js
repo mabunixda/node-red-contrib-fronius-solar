@@ -1,7 +1,6 @@
 module.exports = function(RED) {
   'use strict';
   const fronius = require('node-fronius-solar');
-  const util = require('util');
 
   /**
   * fronius inverter node
@@ -37,7 +36,6 @@ module.exports = function(RED) {
       deviceId: node.deviceid,
       version: node.inverter.apiversion,
     };
-    console.log(node.options);
 
     node.on('input', function(msg) {
       node.processCommand(msg);
@@ -59,10 +57,8 @@ module.exports = function(RED) {
   FroniusControl.prototype.processCommand = function(msg) {
     msg.payload = {};
     const node = this;
-    console.log(node.querytype);
     if (node.querytype === 'inverter') {
       fronius.GetInverterRealtimeData(node.options).then(function(json) { // eslint-disable-line
-        console.log(util.inspect(json, {depth: 4, colors: true}));
         if (!node.isValidHead(json)) {
           node.setNodeStatus('orange', json.Head.Status.UserMessage);
           return;
@@ -70,7 +66,6 @@ module.exports = function(RED) {
         msg.payload = json.Body.Data;
         node.send(msg);
       }).catch(function(e) {
-        console.log(e);
         node.setNodeStatus('red', e);
       });
     } else if (node.querytype === 'components') {
