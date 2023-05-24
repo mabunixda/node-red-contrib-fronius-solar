@@ -80,7 +80,7 @@ module.exports = function(RED) {
         setNodeStatus('red', e);
       });
     } else if (node.querytype === 'powerflow') {
-      fronius.GetPowerFlowRealtimeDataData(node.options).then(function(json) { // eslint-disable-line
+      fronius.GetPowerFlowRealtimeData(node.options).then(function(json) { // eslint-disable-line
         if (!node.isValidHead(json)) {
           node.setNodeStatus('orange', json.Head.Status.UserMessage);
           return;
@@ -102,7 +102,7 @@ module.exports = function(RED) {
         node.setNodeStatus('red', e);
       });
     } else if (node.querytype === 'powermeter') {
-      fronius.GetPowerMeterRealtimeData(node.options).then(function(json) { // eslint-disable-line
+      fronius.GetMeterRealtimeData(node.options).then(function(json) { // eslint-disable-line
         if (!node.isValidHead(json)) {
           node.setNodeStatus('orange', json.Head.Status.UserMessage);
           return;
