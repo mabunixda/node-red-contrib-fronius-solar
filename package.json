@@ -16,15 +16,27 @@
     }
   },
   "dependencies": {
-    "mocha": "^9.1.2",
+    "mocha": "^11.7.1",
     "node-fronius-solar": "^0.0.10"
   },
   "devDependencies": {
-    "npm-check": "^5.9.2",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.30.0",
+    "eslint": "^9.33.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-standard": "^5.0.0"
+    "eslint-plugin-standard": "^4.1.0",
+    "node-red": "^4.1.0",
+    "node-red-node-test-helper": "^0.3.5",
+    "npm-check": "^6.0.1",
+    "should": "^13.2.3",
+    "sinon": "^21.0.0"
+  },
+    "scripts": {
+    "test": "mocha --sort --exit --timeout 5000 test/**/*.js",
+    "lint:fix": "eslint --fix fronius/**.js",
+    "lint": "eslint fronius/**.js",
+    "eslint:github-action": "eslint fronius/**.js",
+    "fmt": "prettier --write **/*.{js,yml}",
+    "fmt:check": "prettier --check **/*.{js,yml}"
   },
   "repository": "mabunixda/node-red-contrib-fronius-solar"
 }
