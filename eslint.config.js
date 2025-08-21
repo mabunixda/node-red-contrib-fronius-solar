@@ -1,12 +1,12 @@
-const js = require('@eslint/js');
+const js = require("@eslint/js");
 
 module.exports = [
   {
     ...js.configs.recommended,
-    files: ['nuki/**/*.js'],
+    files: ["nuki/**/*.js"],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'module',
+      sourceType: "module",
     },
     rules: {
       // Add or override rules as needed
