@@ -269,4 +269,175 @@ describe("Fronius Node", function () {
       n2.receive({});
     });
   });
+
+  it("should preserve message properties", function (done) {
+    const fakeData = {
+      Head: { Status: { Code: 0 } },
+      Body: { Data: { value: 42 } },
+    };
+    froniusApiMock.GetInverterRealtimeData.resolves(fakeData);
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "localhost",
+        port: 80,
+        apiversion: 1,
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "inverter",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+    helper.load(froniusNode, flow, function () {
+      const n2 = helper.getNode("n2");
+      const n3 = helper.getNode("n3");
+      n3.on("input", function (msg) {
+        try {
+          msg.should.have.property("topic", "custom_topic");
+          msg.should.have.property("customProp", "test");
+          msg.should.have.property("payload").have.property("value", 42);
+          done();
+        } catch (err) {
+          done(err);
+        }
+      });
+      n2.receive({ topic: "custom_topic", customProp: "test" });
+    });
+  });
+
+  it("should handle API version 0", function (done) {
+    const fakeData = {
+      Head: { Status: { Code: 0 } },
+      Body: { Data: { value: 42 } },
+    };
+    froniusApiMock.GetInverterRealtimeData.resolves(fakeData);
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "localhost",
+        port: 80,
+        apiversion: 0,
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "inverter",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+    helper.load(froniusNode, flow, function () {
+      const n2 = helper.getNode("n2");
+      const n3 = helper.getNode("n3");
+      n2.receive({});
+      n3.on("input", function (msg) {
+        try {
+          froniusApiMock.GetInverterRealtimeData.firstCall.args[0].should.have.property(
+            "version",
+            0,
+          );
+          done();
+        } catch (err) {
+          done(err);
+        }
+      });
+    });
+  });
+
+  it("should handle undefined query type", function (done) {
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "localhost",
+        port: 80,
+        apiversion: 1,
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "unknown",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+    helper.load(froniusNode, flow, function () {
+      const n2 = helper.getNode("n2");
+      let statusSet = false;
+
+      // Override status function to catch the status update
+      const originalStatus = n2.status;
+      n2.status = function (status) {
+        originalStatus.call(n2, status);
+        if (
+          !statusSet &&
+          status.fill === "orange" &&
+          status.text.includes("could not process query")
+        ) {
+          statusSet = true;
+          done();
+        }
+      };
+      n2.receive({});
+    });
+  });
+
+  it("should handle invalid port configuration", function (done) {
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "localhost",
+        port: -1, // Invalid port
+        apiversion: 1,
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "inverter",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+    helper.load(froniusNode, flow, function () {
+      const n2 = helper.getNode("n2");
+
+      // Mock the API call to reject with a port error
+      froniusApiMock.GetInverterRealtimeData.rejects(
+        new Error("Invalid port number"),
+      );
+
+      let statusSet = false;
+      const originalStatus = n2.status;
+      n2.status = function (status) {
+        originalStatus.call(n2, status);
+        if (!statusSet && status.fill === "red") {
+          statusSet = true;
+          done();
+        }
+      };
+      n2.receive({});
+    });
+  });
 });
