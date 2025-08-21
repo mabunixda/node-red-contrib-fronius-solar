@@ -100,7 +100,7 @@ module.exports = function (RED) {
           node.send(msg);
         })
         .catch(function (e) {
-          setNodeStatus("red", e);
+          node.setNodeStatus("red", e);
         });
     } else if (node.querytype === "powerflow") {
       fronius
