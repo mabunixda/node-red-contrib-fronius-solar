@@ -1,12 +1,12 @@
-module.exports = function(RED) {
-  'use strict';
-  const fronius = require('node-fronius-solar');
+module.exports = function (RED) {
+  "use strict";
+  const fronius = require("node-fronius-solar");
 
   /**
-  * fronius inverter node
-  * @constructor
-  * @param {map} config nodered configuration item
-  */
+   * fronius inverter node
+   * @constructor
+   * @param {map} config nodered configuration item
+   */
   function FroniusInverter(config) {
     RED.nodes.createNode(this, config);
 
@@ -16,7 +16,7 @@ module.exports = function(RED) {
     node.apiversion = config.apiversion;
   }
 
-  RED.nodes.registerType('fronius-inverter', FroniusInverter);
+  RED.nodes.registerType("fronius-inverter", FroniusInverter);
 
   /**
    * fronius control node
@@ -37,13 +37,13 @@ module.exports = function(RED) {
       version: node.inverter.apiversion,
     };
 
-    node.on('input', function(msg) {
+    node.on("input", function (msg) {
       node.processCommand(msg);
     });
   }
 
-  FroniusControl.prototype.setNodeStatus = function(color, text, shape) {
-    shape = shape || 'dot';
+  FroniusControl.prototype.setNodeStatus = function (color, text, shape) {
+    shape = shape || "dot";
     this.status({
       fill: color,
       shape: shape,
@@ -51,72 +51,95 @@ module.exports = function(RED) {
     });
   };
 
-  FroniusControl.prototype.isValidHead = function(json) {
-    return (json.Head.Status.Code === 0);
+  const logic = require("./fronius-logic");
+  FroniusControl.prototype.isValidHead = function (json) {
+    return logic.isValidHead(json);
   };
-  FroniusControl.prototype.processCommand = function(msg) {
+  FroniusControl.prototype.processCommand = function (msg) {
     msg.payload = {};
     const node = this;
-    if (node.querytype === 'inverter') {
-      fronius.GetInverterRealtimeData(node.options).then(function(json) { // eslint-disable-line
-        if (!node.isValidHead(json)) {
-          node.setNodeStatus('orange', json.Head.Status.UserMessage);
-          return;
-        }
-        msg.payload = json.Body.Data;
-        node.send(msg);
-      }).catch(function(e) {
-        node.setNodeStatus('red', e);
-      });
-    } else if (node.querytype === 'components') {
-      fronius.GetComponentsData(node.options).then(function(json) { // eslint-disable-line
-        if (!node.isValidHead(json)) {
-          node.setNodeStatus('orange', json.Head.Status.UserMessage);
-          return;
-        }
-        msg.payload = json.Body.Data;
-        node.send(msg);
-      }).catch(function(e) {
-        setNodeStatus('red', e);
-      });
-    } else if (node.querytype === 'powerflow') {
-      fronius.GetPowerFlowRealtimeData(node.options).then(function(json) { // eslint-disable-line
-        if (!node.isValidHead(json)) {
-          node.setNodeStatus('orange', json.Head.Status.UserMessage);
-          return;
-        }
-        msg.payload = json.Body.Data;
-        node.send(msg);
-      }).catch(function(e) {
-        node.setNodeStatus('red', e);
-      });
-    } else if (node.querytype === 'storage') {
-      fronius.GetStorageRealtimeData(node.options).then(function(json) { // eslint-disable-line
-        if (!node.isValidHead(json)) {
-          node.setNodeStatus('orange', json.Head.Status.UserMessage);
-          return;
-        }
-        msg.payload = json.Body.Data;
-        node.send(msg);
-      }).catch(function(e) {
-        node.setNodeStatus('red', e);
-      });
-    } else if (node.querytype === 'powermeter') {
-      fronius.GetMeterRealtimeData(node.options).then(function(json) { // eslint-disable-line
-        if (!node.isValidHead(json)) {
-          node.setNodeStatus('orange', json.Head.Status.UserMessage);
-          return;
-        }
-        msg.payload = json.Body.Data;
-        node.send(msg);
-      }).catch(function(e) {
-        node.setNodeStatus('red', e);
-      });
+    if (node.querytype === "inverter") {
+      fronius
+        .GetInverterRealtimeData(node.options)
+        .then(function (json) {
+          // eslint-disable-line
+          if (!node.isValidHead(json)) {
+            node.setNodeStatus("orange", json.Head.Status.UserMessage);
+            return;
+          }
+          msg.payload = json.Body.Data;
+          node.send(msg);
+        })
+        .catch(function (e) {
+          node.setNodeStatus("red", e);
+        });
+    } else if (node.querytype === "components") {
+      fronius
+        .GetComponentsData(node.options)
+        .then(function (json) {
+          // eslint-disable-line
+          if (!node.isValidHead(json)) {
+            node.setNodeStatus("orange", json.Head.Status.UserMessage);
+            return;
+          }
+          msg.payload = json.Body.Data;
+          node.send(msg);
+        })
+        .catch(function (e) {
+          setNodeStatus("red", e);
+        });
+    } else if (node.querytype === "powerflow") {
+      fronius
+        .GetPowerFlowRealtimeData(node.options)
+        .then(function (json) {
+          // eslint-disable-line
+          if (!node.isValidHead(json)) {
+            node.setNodeStatus("orange", json.Head.Status.UserMessage);
+            return;
+          }
+          msg.payload = json.Body.Data;
+          node.send(msg);
+        })
+        .catch(function (e) {
+          node.setNodeStatus("red", e);
+        });
+    } else if (node.querytype === "storage") {
+      fronius
+        .GetStorageRealtimeData(node.options)
+        .then(function (json) {
+          // eslint-disable-line
+          if (!node.isValidHead(json)) {
+            node.setNodeStatus("orange", json.Head.Status.UserMessage);
+            return;
+          }
+          msg.payload = json.Body.Data;
+          node.send(msg);
+        })
+        .catch(function (e) {
+          node.setNodeStatus("red", e);
+        });
+    } else if (node.querytype === "powermeter") {
+      fronius
+        .GetMeterRealtimeData(node.options)
+        .then(function (json) {
+          // eslint-disable-line
+          if (!node.isValidHead(json)) {
+            node.setNodeStatus("orange", json.Head.Status.UserMessage);
+            return;
+          }
+          msg.payload = json.Body.Data;
+          node.send(msg);
+        })
+        .catch(function (e) {
+          node.setNodeStatus("red", e);
+        });
     } else {
-      node.setNodeStatus('orange', 'could not process query of ' +
-        node.querytype);
+      node.setNodeStatus(
+        "orange",
+        "could not process query of " + node.querytype,
+      );
     }
   };
 
-  RED.nodes.registerType('fronius-control', FroniusControl);
+  RED.nodes.registerType("fronius-control", FroniusControl);
 };
