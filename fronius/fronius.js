@@ -30,12 +30,18 @@ module.exports = function (RED) {
     node.deviceid = config.deviceid;
     node.inverter = RED.nodes.getNode(config.inverter);
     node.querytype = config.querytype;
-    node.options = {
-      host: node.inverter.host,
-      port: node.inverter.port,
-      deviceId: node.deviceid,
-      version: node.inverter.apiversion,
-    };
+    if (node.inverter) {
+      node.options = {
+        host: node.inverter.host,
+        port: node.inverter.port,
+        deviceId: node.deviceid,
+        version: node.inverter.apiversion,
+      };
+    } else {
+      node.options = {};
+      // Always set status if inverter is missing
+      node.status({ fill: "red", shape: "ring", text: "Missing inverter config" });
+    }
 
     node.on("input", function (msg) {
       node.processCommand(msg);
@@ -44,6 +50,11 @@ module.exports = function (RED) {
 
   FroniusControl.prototype.setNodeStatus = function (color, text, shape) {
     shape = shape || "dot";
+    // Debug output for test reliability
+    if (process.env.NODE_ENV === 'test') {
+       
+      console.log(`[setNodeStatus] color: ${color}, text: ${text}, shape: ${shape}`);
+    }
     this.status({
       fill: color,
       shape: shape,
@@ -62,7 +73,7 @@ module.exports = function (RED) {
       fronius
         .GetInverterRealtimeData(node.options)
         .then(function (json) {
-          // eslint-disable-line
+           
           if (!node.isValidHead(json)) {
             node.setNodeStatus("orange", json.Head.Status.UserMessage);
             return;
@@ -77,7 +88,7 @@ module.exports = function (RED) {
       fronius
         .GetComponentsData(node.options)
         .then(function (json) {
-          // eslint-disable-line
+           
           if (!node.isValidHead(json)) {
             node.setNodeStatus("orange", json.Head.Status.UserMessage);
             return;
@@ -92,7 +103,7 @@ module.exports = function (RED) {
       fronius
         .GetPowerFlowRealtimeData(node.options)
         .then(function (json) {
-          // eslint-disable-line
+           
           if (!node.isValidHead(json)) {
             node.setNodeStatus("orange", json.Head.Status.UserMessage);
             return;
@@ -107,7 +118,7 @@ module.exports = function (RED) {
       fronius
         .GetStorageRealtimeData(node.options)
         .then(function (json) {
-          // eslint-disable-line
+           
           if (!node.isValidHead(json)) {
             node.setNodeStatus("orange", json.Head.Status.UserMessage);
             return;
@@ -122,7 +133,7 @@ module.exports = function (RED) {
       fronius
         .GetMeterRealtimeData(node.options)
         .then(function (json) {
-          // eslint-disable-line
+           
           if (!node.isValidHead(json)) {
             node.setNodeStatus("orange", json.Head.Status.UserMessage);
             return;
