@@ -20,6 +20,7 @@
     "node-fronius-solar": "^0.0.10"
   },
   "devDependencies": {
+    "@eslint/js": "^9.33.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^9.33.0",
     "eslint-config-google": "^0.14.0",
@@ -32,8 +33,8 @@
   },
     "scripts": {
     "test": "mocha --sort --exit --timeout 5000 test/**/*.js",
-    "lint:fix": "eslint --fix fronius/**.js",
-    "lint": "eslint fronius/**.js",
+    "lint:fix": "eslint --fix fronius/*.js",
+    "lint": "eslint fronius/*.js",
     "eslint:github-action": "eslint fronius/**.js",
     "fmt": "prettier --write **/*.{js,yml}",
     "fmt:check": "prettier --check **/*.{js,yml}"
