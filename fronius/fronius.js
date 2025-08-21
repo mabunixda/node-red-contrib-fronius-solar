@@ -40,7 +40,11 @@ module.exports = function (RED) {
     } else {
       node.options = {};
       // Always set status if inverter is missing
-      node.status({ fill: "red", shape: "ring", text: "Missing inverter config" });
+      node.status({
+        fill: "red",
+        shape: "ring",
+        text: "Missing inverter config",
+      });
     }
 
     node.on("input", function (msg) {
@@ -51,9 +55,10 @@ module.exports = function (RED) {
   FroniusControl.prototype.setNodeStatus = function (color, text, shape) {
     shape = shape || "dot";
     // Debug output for test reliability
-    if (process.env.NODE_ENV === 'test') {
-       
-      console.log(`[setNodeStatus] color: ${color}, text: ${text}, shape: ${shape}`);
+    if (process.env.NODE_ENV === "test") {
+      console.log(
+        `[setNodeStatus] color: ${color}, text: ${text}, shape: ${shape}`,
+      );
     }
     this.status({
       fill: color,
@@ -73,7 +78,6 @@ module.exports = function (RED) {
       fronius
         .GetInverterRealtimeData(node.options)
         .then(function (json) {
-           
           if (!node.isValidHead(json)) {
             node.setNodeStatus("orange", json.Head.Status.UserMessage);
             return;
@@ -88,7 +92,6 @@ module.exports = function (RED) {
       fronius
         .GetComponentsData(node.options)
         .then(function (json) {
-           
           if (!node.isValidHead(json)) {
             node.setNodeStatus("orange", json.Head.Status.UserMessage);
             return;
@@ -103,7 +106,6 @@ module.exports = function (RED) {
       fronius
         .GetPowerFlowRealtimeData(node.options)
         .then(function (json) {
-           
           if (!node.isValidHead(json)) {
             node.setNodeStatus("orange", json.Head.Status.UserMessage);
             return;
@@ -118,7 +120,6 @@ module.exports = function (RED) {
       fronius
         .GetStorageRealtimeData(node.options)
         .then(function (json) {
-           
           if (!node.isValidHead(json)) {
             node.setNodeStatus("orange", json.Head.Status.UserMessage);
             return;
@@ -133,7 +134,6 @@ module.exports = function (RED) {
       fronius
         .GetMeterRealtimeData(node.options)
         .then(function (json) {
-           
           if (!node.isValidHead(json)) {
             node.setNodeStatus("orange", json.Head.Status.UserMessage);
             return;
