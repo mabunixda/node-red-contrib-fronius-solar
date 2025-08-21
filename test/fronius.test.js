@@ -269,6 +269,4 @@ describe("Fronius Node", function () {
       n2.receive({});
     });
   });
-
-
 });
