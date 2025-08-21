@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "mocha": "^11.7.1",
-    "mocha": "^11.7.1",
     "node-fronius-solar": "^0.0.10"
   },
   "devDependencies": {
