@@ -28,16 +28,19 @@
     "node-red": "^4.1.0",
     "node-red-node-test-helper": "^0.3.5",
     "npm-check": "^6.0.1",
+    "nyc": "^17.1.0",
+    "proxyquire": "^2.1.3",
     "should": "^13.2.3",
     "sinon": "^21.0.0"
   },
-    "scripts": {
+  "scripts": {
     "test": "mocha --sort --exit --timeout 5000 test/**/*.js",
     "lint:fix": "eslint --fix fronius/*.js",
     "lint": "eslint fronius/*.js",
     "eslint:github-action": "eslint fronius/**.js",
     "fmt": "prettier --write **/*.{js,yml}",
-    "fmt:check": "prettier --check **/*.{js,yml}"
+    "fmt:check": "prettier --check **/*.{js,yml}",
+    "coverage": "nyc npm test"
   },
   "repository": "mabunixda/node-red-contrib-fronius-solar"
 }
