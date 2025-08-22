@@ -71,85 +71,40 @@ module.exports = function (RED) {
   FroniusControl.prototype.isValidHead = function (json) {
     return logic.isValidHead(json);
   };
+  // Map of query types to their corresponding API methods
+  const API_METHODS = {
+    inverter: "GetInverterRealtimeData",
+    components: "GetComponentsData",
+    powerflow: "GetPowerFlowRealtimeData",
+    storage: "GetStorageRealtimeData",
+    powermeter: "GetMeterRealtimeData",
+  };
+
   FroniusControl.prototype.processCommand = function (msg) {
     msg.payload = {};
     const node = this;
-    if (node.querytype === "inverter") {
-      fronius
-        .GetInverterRealtimeData(node.options)
-        .then(function (json) {
-          if (!node.isValidHead(json)) {
-            node.setNodeStatus("orange", json.Head.Status.UserMessage);
-            return;
-          }
-          msg.payload = json.Body.Data;
-          node.send(msg);
-        })
-        .catch(function (e) {
-          node.setNodeStatus("red", e);
-        });
-    } else if (node.querytype === "components") {
-      fronius
-        .GetComponentsData(node.options)
-        .then(function (json) {
-          if (!node.isValidHead(json)) {
-            node.setNodeStatus("orange", json.Head.Status.UserMessage);
-            return;
-          }
-          msg.payload = json.Body.Data;
-          node.send(msg);
-        })
-        .catch(function (e) {
-          node.setNodeStatus("red", e);
-        });
-    } else if (node.querytype === "powerflow") {
-      fronius
-        .GetPowerFlowRealtimeData(node.options)
-        .then(function (json) {
-          if (!node.isValidHead(json)) {
-            node.setNodeStatus("orange", json.Head.Status.UserMessage);
-            return;
-          }
-          msg.payload = json.Body.Data;
-          node.send(msg);
-        })
-        .catch(function (e) {
-          node.setNodeStatus("red", e);
-        });
-    } else if (node.querytype === "storage") {
-      fronius
-        .GetStorageRealtimeData(node.options)
-        .then(function (json) {
-          if (!node.isValidHead(json)) {
-            node.setNodeStatus("orange", json.Head.Status.UserMessage);
-            return;
-          }
-          msg.payload = json.Body.Data;
-          node.send(msg);
-        })
-        .catch(function (e) {
-          node.setNodeStatus("red", e);
-        });
-    } else if (node.querytype === "powermeter") {
-      fronius
-        .GetMeterRealtimeData(node.options)
-        .then(function (json) {
-          if (!node.isValidHead(json)) {
-            node.setNodeStatus("orange", json.Head.Status.UserMessage);
-            return;
-          }
-          msg.payload = json.Body.Data;
-          node.send(msg);
-        })
-        .catch(function (e) {
-          node.setNodeStatus("red", e);
-        });
-    } else {
+
+    const apiMethod = API_METHODS[node.querytype];
+    if (!apiMethod) {
       node.setNodeStatus(
         "orange",
-        "could not process query of " + node.querytype,
+        `could not process query of ${node.querytype}`,
       );
+      return;
     }
+
+    fronius[apiMethod](node.options)
+      .then((json) => {
+        if (!node.isValidHead(json)) {
+          node.setNodeStatus("orange", json.Head.Status.UserMessage);
+          return;
+        }
+        msg.payload = json.Body.Data;
+        node.send(msg);
+      })
+      .catch((error) => {
+        node.setNodeStatus("red", error);
+      });
   };
 
   RED.nodes.registerType("fronius-control", FroniusControl);

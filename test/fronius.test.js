@@ -444,7 +444,7 @@ describe("Fronius Node", function () {
   it("should handle network timeout errors", function (done) {
     const timeoutError = new Error("Network timeout");
     froniusApiMock.GetInverterRealtimeData.rejects(timeoutError);
-    
+
     const flow = [
       {
         id: "n1",
@@ -469,17 +469,21 @@ describe("Fronius Node", function () {
     helper.load(froniusNode, flow, function () {
       const n2 = helper.getNode("n2");
       let statusChecked = false;
-      
+
       // Monitor status changes
       const originalStatus = n2.status;
-      n2.status = function(status) {
+      n2.status = function (status) {
         originalStatus.call(n2, status);
-        if (!statusChecked && status.fill === "red" && status.text === timeoutError.toString()) {
+        if (
+          !statusChecked &&
+          status.fill === "red" &&
+          status.text === timeoutError.toString()
+        ) {
           statusChecked = true;
           done();
         }
       };
-      
+
       n2.receive({});
     });
   });
@@ -487,7 +491,7 @@ describe("Fronius Node", function () {
   it("should handle invalid JSON responses", function (done) {
     const malformedData = "not a json response";
     froniusApiMock.GetInverterRealtimeData.resolves(malformedData);
-    
+
     const flow = [
       {
         id: "n1",
@@ -513,14 +517,14 @@ describe("Fronius Node", function () {
       const n2 = helper.getNode("n2");
       let messageReceived = false;
       const n3 = helper.getNode("n3");
-      
+
       n3.on("input", function (msg) {
         messageReceived = true;
       });
 
       let statusChecked = false;
       const originalStatus = n2.status;
-      n2.status = function(status) {
+      n2.status = function (status) {
         originalStatus.call(n2, status);
         if (!statusChecked && status.fill === "red") {
           statusChecked = true;
@@ -528,7 +532,7 @@ describe("Fronius Node", function () {
           done();
         }
       };
-      
+
       n2.receive({});
     });
   });
@@ -558,17 +562,17 @@ describe("Fronius Node", function () {
     helper.load(froniusNode, flow, function () {
       const n2 = helper.getNode("n2");
       froniusApiMock.GetInverterRealtimeData.rejects(new Error("Invalid host"));
-      
+
       let statusChecked = false;
       const originalStatus = n2.status;
-      n2.status = function(status) {
+      n2.status = function (status) {
         originalStatus.call(n2, status);
         if (!statusChecked && status.fill === "red") {
           statusChecked = true;
           done();
         }
       };
-      
+
       n2.receive({});
     });
   });
@@ -597,20 +601,22 @@ describe("Fronius Node", function () {
 
     helper.load(froniusNode, flow, function () {
       const n2 = helper.getNode("n2");
-      
+
       // Mock the API call to reject for invalid version
-      froniusApiMock.GetInverterRealtimeData.rejects(new Error("Invalid API version"));
-      
+      froniusApiMock.GetInverterRealtimeData.rejects(
+        new Error("Invalid API version"),
+      );
+
       let statusChecked = false;
       const originalStatus = n2.status;
-      n2.status = function(status) {
+      n2.status = function (status) {
         originalStatus.call(n2, status);
         if (!statusChecked && status.fill === "red") {
           statusChecked = true;
           done();
         }
       };
-      
+
       n2.receive({});
     });
   });
@@ -640,14 +646,14 @@ describe("Fronius Node", function () {
     helper.load(froniusNode, flow, function () {
       const n1 = helper.getNode("n1");
       const n2 = helper.getNode("n2");
-      
+
       // Create a pending request
       n2.receive({});
-      
+
       // Verify both nodes have close handlers
       n1.should.have.property("close");
       n2.should.have.property("close");
-      
+
       // Ensure cleanup happens without errors
       try {
         n1.close();
@@ -668,11 +674,15 @@ describe("Fronius Node", function () {
       Head: { Status: { Code: 0 } },
       Body: { Data: { value: 2 } },
     };
-    
+
     // Setup delayed responses for concurrent requests
-    const request1 = new Promise(resolve => setTimeout(() => resolve(fakeData1), 100));
-    const request2 = new Promise(resolve => setTimeout(() => resolve(fakeData2), 50));
-    
+    const request1 = new Promise((resolve) =>
+      setTimeout(() => resolve(fakeData1), 100),
+    );
+    const request2 = new Promise((resolve) =>
+      setTimeout(() => resolve(fakeData2), 50),
+    );
+
     froniusApiMock.GetInverterRealtimeData.onFirstCall().returns(request1);
     froniusApiMock.GetInverterRealtimeData.onSecondCall().returns(request2);
 
@@ -700,14 +710,14 @@ describe("Fronius Node", function () {
     helper.load(froniusNode, flow, function () {
       const n2 = helper.getNode("n2");
       const n3 = helper.getNode("n3");
-      
+
       let responseCount = 0;
       const responses = [];
-      
+
       n3.on("input", function (msg) {
         responses.push(msg.payload.value);
         responseCount++;
-        
+
         if (responseCount === 2) {
           try {
             // Verify both responses were received
@@ -750,14 +760,14 @@ describe("Fronius Node", function () {
 
     helper.load(froniusNode, flow, function () {
       const n2 = helper.getNode("n2");
-      
+
       // Create multiple errors
       froniusApiMock.GetInverterRealtimeData.rejects(new Error("Test error"));
-      
+
       let errorCount = 0;
       const maxErrors = 5;
       const startHeap = process.memoryUsage().heapUsed;
-      
+
       function checkMemory() {
         errorCount++;
         if (errorCount === maxErrors) {
@@ -769,16 +779,16 @@ describe("Fronius Node", function () {
           n2.receive({});
         }
       }
-      
+
       // Monitor status changes for error handling completion
       const originalStatus = n2.status;
-      n2.status = function(status) {
+      n2.status = function (status) {
         originalStatus.call(n2, status);
         if (status.fill === "red") {
           checkMemory();
         }
       };
-      
+
       n2.receive({});
     });
   });
