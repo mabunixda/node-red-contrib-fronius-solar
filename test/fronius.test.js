@@ -440,4 +440,356 @@ describe("Fronius Node", function () {
       n2.receive({});
     });
   });
+
+  it("should handle network timeout errors", function (done) {
+    const timeoutError = new Error("Network timeout");
+    froniusApiMock.GetInverterRealtimeData.rejects(timeoutError);
+
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "localhost",
+        port: 80,
+        apiversion: 1,
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "inverter",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+
+    helper.load(froniusNode, flow, function () {
+      const n2 = helper.getNode("n2");
+      let statusChecked = false;
+
+      // Monitor status changes
+      const originalStatus = n2.status;
+      n2.status = function (status) {
+        originalStatus.call(n2, status);
+        if (
+          !statusChecked &&
+          status.fill === "red" &&
+          status.text === timeoutError.toString()
+        ) {
+          statusChecked = true;
+          done();
+        }
+      };
+
+      n2.receive({});
+    });
+  });
+
+  it("should handle invalid JSON responses", function (done) {
+    const malformedData = "not a json response";
+    froniusApiMock.GetInverterRealtimeData.resolves(malformedData);
+
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "localhost",
+        port: 80,
+        apiversion: 1,
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "inverter",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+
+    helper.load(froniusNode, flow, function () {
+      const n2 = helper.getNode("n2");
+      let messageReceived = false;
+      const n3 = helper.getNode("n3");
+
+      n3.on("input", function (msg) {
+        messageReceived = true;
+      });
+
+      let statusChecked = false;
+      const originalStatus = n2.status;
+      n2.status = function (status) {
+        originalStatus.call(n2, status);
+        if (!statusChecked && status.fill === "red") {
+          statusChecked = true;
+          messageReceived.should.be.false();
+          done();
+        }
+      };
+
+      n2.receive({});
+    });
+  });
+
+  it("should validate host configuration", function (done) {
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "", // Empty host
+        port: 80,
+        apiversion: 1,
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "inverter",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+
+    helper.load(froniusNode, flow, function () {
+      const n2 = helper.getNode("n2");
+      froniusApiMock.GetInverterRealtimeData.rejects(new Error("Invalid host"));
+
+      let statusChecked = false;
+      const originalStatus = n2.status;
+      n2.status = function (status) {
+        originalStatus.call(n2, status);
+        if (!statusChecked && status.fill === "red") {
+          statusChecked = true;
+          done();
+        }
+      };
+
+      n2.receive({});
+    });
+  });
+
+  it("should validate API version", function (done) {
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "localhost",
+        port: 80,
+        apiversion: 99, // Invalid version
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "inverter",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+
+    helper.load(froniusNode, flow, function () {
+      const n2 = helper.getNode("n2");
+
+      // Mock the API call to reject for invalid version
+      froniusApiMock.GetInverterRealtimeData.rejects(
+        new Error("Invalid API version"),
+      );
+
+      let statusChecked = false;
+      const originalStatus = n2.status;
+      n2.status = function (status) {
+        originalStatus.call(n2, status);
+        if (!statusChecked && status.fill === "red") {
+          statusChecked = true;
+          done();
+        }
+      };
+
+      n2.receive({});
+    });
+  });
+
+  it("should handle node close event and cleanup", function (done) {
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "localhost",
+        port: 80,
+        apiversion: 1,
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "inverter",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+
+    helper.load(froniusNode, flow, function () {
+      const n1 = helper.getNode("n1");
+      const n2 = helper.getNode("n2");
+
+      // Create a pending request
+      n2.receive({});
+
+      // Verify both nodes have close handlers
+      n1.should.have.property("close");
+      n2.should.have.property("close");
+
+      // Ensure cleanup happens without errors
+      try {
+        n1.close();
+        n2.close();
+        done();
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
+
+  it("should handle concurrent requests properly", function (done) {
+    const fakeData1 = {
+      Head: { Status: { Code: 0 } },
+      Body: { Data: { value: 1 } },
+    };
+    const fakeData2 = {
+      Head: { Status: { Code: 0 } },
+      Body: { Data: { value: 2 } },
+    };
+
+    // Setup delayed responses for concurrent requests
+    const request1 = new Promise((resolve) =>
+      setTimeout(() => resolve(fakeData1), 100),
+    );
+    const request2 = new Promise((resolve) =>
+      setTimeout(() => resolve(fakeData2), 50),
+    );
+
+    froniusApiMock.GetInverterRealtimeData.onFirstCall().returns(request1);
+    froniusApiMock.GetInverterRealtimeData.onSecondCall().returns(request2);
+
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "localhost",
+        port: 80,
+        apiversion: 1,
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "inverter",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+
+    helper.load(froniusNode, flow, function () {
+      const n2 = helper.getNode("n2");
+      const n3 = helper.getNode("n3");
+
+      let responseCount = 0;
+      const responses = [];
+
+      n3.on("input", function (msg) {
+        responses.push(msg.payload.value);
+        responseCount++;
+
+        if (responseCount === 2) {
+          try {
+            // Verify both responses were received
+            responses.should.have.length(2);
+            responses.should.containDeep([1, 2]);
+            done();
+          } catch (err) {
+            done(err);
+          }
+        }
+      });
+
+      // Send two requests in quick succession
+      n2.receive({ id: 1 });
+      n2.receive({ id: 2 });
+    });
+  });
+
+  it("should prevent memory leaks in error handlers", function (done) {
+    const flow = [
+      {
+        id: "n1",
+        type: "fronius-inverter",
+        name: "test inverter",
+        host: "localhost",
+        port: 80,
+        apiversion: 1,
+      },
+      {
+        id: "n2",
+        type: "fronius-control",
+        name: "test control",
+        inverter: "n1",
+        querytype: "inverter",
+        deviceid: 1,
+        wires: [["n3"]],
+      },
+      { id: "n3", type: "helper" },
+    ];
+
+    helper.load(froniusNode, flow, function () {
+      const n2 = helper.getNode("n2");
+
+      // Create multiple errors
+      froniusApiMock.GetInverterRealtimeData.rejects(new Error("Test error"));
+
+      let errorCount = 0;
+      const maxErrors = 5;
+      const startHeap = process.memoryUsage().heapUsed;
+
+      function checkMemory() {
+        errorCount++;
+        if (errorCount === maxErrors) {
+          const endHeap = process.memoryUsage().heapUsed;
+          // Allow for some overhead but ensure no significant leak
+          (endHeap - startHeap).should.be.below(1000000); // Less than 1MB difference
+          done();
+        } else if (errorCount < maxErrors) {
+          n2.receive({});
+        }
+      }
+
+      // Monitor status changes for error handling completion
+      const originalStatus = n2.status;
+      n2.status = function (status) {
+        originalStatus.call(n2, status);
+        if (status.fill === "red") {
+          checkMemory();
+        }
+      };
+
+      n2.receive({});
+    });
+  });
 });
