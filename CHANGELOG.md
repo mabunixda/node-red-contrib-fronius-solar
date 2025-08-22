@@ -1,3 +1,17 @@
+<a id="v1.0.6"></a>
+# [v1.0.6](https://github.com/mabunixda/node-red-contrib-fronius-solar/releases/tag/v1.0.6) - 2025-08-22
+
+## 1.0.6 (2025-08-22)
+
+#### Bug Fixes
+
+* refactoring ([#37](https://github.com/mabunixda/node-red-contrib-fronius-solar/issues/37)) (0e0bc6a2)
+
+
+
+[Changes][v1.0.6]
+
+
 <a id="v1.0.5"></a>
 # [v1.0.5](https://github.com/mabunixda/node-red-contrib-fronius-solar/releases/tag/v1.0.5) - 2025-08-21
 
@@ -91,6 +105,7 @@
 [Changes][v1.0.0]
 
 
+[v1.0.6]: https://github.com/mabunixda/node-red-contrib-fronius-solar/compare/v1.0.5...v1.0.6
 [v1.0.5]: https://github.com/mabunixda/node-red-contrib-fronius-solar/compare/v1.0.4...v1.0.5
 [v1.0.4]: https://github.com/mabunixda/node-red-contrib-fronius-solar/compare/v1.0.3...v1.0.4
 [v1.0.3]: https://github.com/mabunixda/node-red-contrib-fronius-solar/compare/v1.0.2...v1.0.3
