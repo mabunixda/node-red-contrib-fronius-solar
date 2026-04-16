@@ -40,7 +40,7 @@ describe("Fronius Node", function () {
       GetMeterRealtimeData: sinon.stub(),
     };
     froniusNode = proxyquire("../fronius/fronius.js", {
-      "node-fronius-solar": froniusApiMock,
+      "./fronius-api": froniusApiMock,
     });
   });
 
