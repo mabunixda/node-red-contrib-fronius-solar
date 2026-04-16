@@ -1,6 +1,6 @@
 module.exports = function (RED) {
   "use strict";
-  const fronius = require("node-fronius-solar");
+  const fronius = require("./fronius-api");
 
   /**
    * fronius inverter node
